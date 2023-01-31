@@ -7,16 +7,16 @@ import (
 )
 
 type Dimensions struct {
-	Width  float32 `toml:"width"`
-	Height float32 `toml:"height"`
+	Width  float64 `toml:"width"`
+	Height float64 `toml:"height"`
 }
 
 type Object struct {
 	FieldName string  `toml:"name"`
-	X         float32 `toml:"x"`
-	Y         float32 `toml:"y"`
-	Width     float32 `toml:"width"`
-	Height    float32 `toml:"height"`
+	X         float64 `toml:"x"`
+	Y         float64 `toml:"y"`
+	Width     float64 `toml:"width"`
+	Height    float64 `toml:"height"`
 }
 
 type Format struct {

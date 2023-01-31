@@ -13,19 +13,31 @@ var (
 	BOX_TEMPLATE_SRC = "<rect width=\"{{.Width}}\" height=\"{{.Height}}\" " +
 		"x=\"{{.X}}\" y=\"{{.Y}}\" style=\"fill:none;stroke:#000000;stroke-width:0.3\"/>"
 	BOX_TEMPLATE = template.Must(template.New("box").Parse(BOX_TEMPLATE_SRC))
+
+	TEXT_TEMPLATE_SRC = "<text x=\"{{.X}}\" y=\"{{.Y}}\" " +
+		"style=\"font-size:{{.FontSize}}px;line-height:1.25;font-family:Arial\">" +
+		"{{.Text}}</text>"
+	TEXT_TEMPLATE = template.Must(template.New("text").Parse(TEXT_TEMPLATE_SRC))
 )
 
 type BoxTemplateSource struct {
-	X      float32
-	Y      float32
-	Width  float32
-	Height float32
+	X      float64
+	Y      float64
+	Width  float64
+	Height float64
 }
 
 type SvgTemplateSource struct {
-	Width    float32
-	Height   float32
+	Width    float64
+	Height   float64
 	Contents string
+}
+
+type TextTemplateSource struct {
+	X        float64
+	Y        float64
+	FontSize float64
+	Text     string
 }
 
 func executeTemplate(tmpl *template.Template, data interface{}) (string, error) {
@@ -51,7 +63,22 @@ func CreateSingleSvg(format Format, data map[string]string) (string, error) {
 			return "", err
 		}
 
-		contents += box_contents
+		text_fit := stringFit(data[object.FieldName], object.Width, object.Height)
+
+		text_data := TextTemplateSource{
+			X:        object.X - text_fit.LeftBearing,
+			Y:        object.Y + object.Height,
+			FontSize: text_fit.FontSize,
+			Text:     data[object.FieldName],
+		}
+
+		text_contents, err := executeTemplate(TEXT_TEMPLATE, text_data)
+
+		if err != nil {
+			return "", err
+		}
+
+		contents += box_contents + text_contents
 	}
 
 	svg_data := SvgTemplateSource{
