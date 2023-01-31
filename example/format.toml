@@ -1,0 +1,19 @@
+[dimensions]
+width = 105
+height = 74.25
+
+[[objects]]
+name = "firstname"
+
+x = 10
+y = 10
+width = 85
+height = 25
+
+[[objects]]
+name = "lastname"
+
+x = 10
+y = 40
+width = 85
+height = 25
