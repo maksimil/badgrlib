@@ -15,8 +15,8 @@ type Object struct {
 	FieldName string  `toml:"name"`
 	X         float32 `toml:"x"`
 	Y         float32 `toml:"y"`
-	Width     float32 `toml:"w"`
-	Height    float32 `toml:"h"`
+	Width     float32 `toml:"width"`
+	Height    float32 `toml:"height"`
 }
 
 type Format struct {
