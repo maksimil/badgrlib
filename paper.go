@@ -29,10 +29,10 @@ type GTemplateSource struct {
 	Contents  string
 }
 
-func CreatePaper(format Format, datas []map[string]string) (string, error) {
+func FitSvgsToPaper(format Format, svg_strings []string) (string, error) {
 	objects_on_page := format.PaperFit.X * format.PaperFit.Y
-	if len(datas) < objects_on_page {
-		objects_on_page = len(datas)
+	if len(svg_strings) < objects_on_page {
+		objects_on_page = len(svg_strings)
 	}
 
 	contents := ""
@@ -41,15 +41,9 @@ func CreatePaper(format Format, datas []map[string]string) (string, error) {
 		x_pos := float64(i % format.PaperFit.X)
 		y_pos := float64(i / format.PaperFit.X)
 
-		object_svg, err := CreateSingleSvg(format, datas[i])
-
-		if err != nil {
-			return "", err
-		}
-
 		group_data := GTemplateSource{
 			Translate: Translate{X: x_pos * format.Dimensions.Width, Y: y_pos * format.Dimensions.Height},
-			Contents:  object_svg,
+			Contents:  svg_strings[i],
 		}
 
 		group_string, err := executeTemplate(G_TEMPLATE, group_data)
