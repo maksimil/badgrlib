@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	SVG_TEMPLATE_SRC = "<svg width=\"{{.Width}}mm\" height=\"{{.Height}}mm\" " +
-		"viewBox=\"0 0 {{.Width}} {{.Height}}\">{{.Contents}}</svg>"
+	SVG_TEMPLATE_SRC = "<svg width=\"{{.Dimensions.Width}}mm\" height=\"{{.Dimensions.Height}}mm\" " +
+		"viewBox=\"0 0 {{.Dimensions.Width}} {{.Dimensions.Height}}\">{{.Contents}}</svg>"
 	SVG_TEMPLATE = template.Must(template.New("svg").Parse(SVG_TEMPLATE_SRC))
 
 	G_TEMPLATE_SRC = "<g transform=\"translate({{.Translate.X}}," +
@@ -15,9 +15,8 @@ var (
 )
 
 type SvgTemplateSource struct {
-	Width    float64
-	Height   float64
-	Contents string
+	Dimensions Dimensions
+	Contents   string
 }
 
 type Translate struct {
@@ -63,8 +62,10 @@ func CreatePaper(format Format, datas []map[string]string) (string, error) {
 	}
 
 	svg_data := SvgTemplateSource{
-		Width:    format.Dimensions.Width * float64(format.PaperFit.X),
-		Height:   format.Dimensions.Height * float64(format.PaperFit.Y),
+		Dimensions: Dimensions{
+			Width:  format.Dimensions.Width * float64(format.PaperFit.X),
+			Height: format.Dimensions.Height * float64(format.PaperFit.Y),
+		},
 		Contents: contents,
 	}
 

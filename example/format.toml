@@ -10,14 +10,12 @@ height = 74.25
 name = "firstname"
 
 x = 10
-y = 10
-width = 85
-height = 25
+y = 30
+font_size = 18
 
 [[objects]]
 name = "lastname"
 
 x = 10
-y = 40
-width = 85
-height = 25
+y = 60
+font_size = 16
