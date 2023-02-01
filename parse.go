@@ -6,6 +6,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+type PaperFit struct {
+	X int `toml:"x"`
+	Y int `toml:"y"`
+}
+
 type Dimensions struct {
 	Width  float64 `toml:"width"`
 	Height float64 `toml:"height"`
@@ -21,6 +26,7 @@ type Object struct {
 
 type Format struct {
 	Dimensions Dimensions `toml:"dimensions"`
+	PaperFit   PaperFit   `toml:"paper_fit"`
 	Objects    []Object   `toml:"objects"`
 }
 

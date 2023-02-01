@@ -6,10 +6,6 @@ import (
 )
 
 var (
-	SVG_TEMPLATE_SRC = "<svg width=\"{{.Width}}mm\" height=\"{{.Height}}mm\" " +
-		"viewBox=\"0 0 {{.Width}} {{.Height}}\">{{.Contents}}</svg>"
-	SVG_TEMPLATE = template.Must(template.New("svg").Parse(SVG_TEMPLATE_SRC))
-
 	BOX_TEMPLATE_SRC = "<rect width=\"{{.Width}}\" height=\"{{.Height}}\" " +
 		"x=\"{{.X}}\" y=\"{{.Y}}\" style=\"fill:none;stroke:#000000;stroke-width:0.3\"/>"
 	BOX_TEMPLATE = template.Must(template.New("box").Parse(BOX_TEMPLATE_SRC))
@@ -25,12 +21,6 @@ type BoxTemplateSource struct {
 	Y      float64
 	Width  float64
 	Height float64
-}
-
-type SvgTemplateSource struct {
-	Width    float64
-	Height   float64
-	Contents string
 }
 
 type TextTemplateSource struct {
@@ -81,17 +71,5 @@ func CreateSingleSvg(format Format, data map[string]string) (string, error) {
 		contents += box_contents + text_contents
 	}
 
-	svg_data := SvgTemplateSource{
-		Width:    format.Dimensions.Width,
-		Height:   format.Dimensions.Height,
-		Contents: contents,
-	}
-
-	svg_contents, err := executeTemplate(SVG_TEMPLATE, svg_data)
-
-	if err != nil {
-		return "", err
-	}
-
-	return svg_contents, nil
+	return contents, nil
 }
