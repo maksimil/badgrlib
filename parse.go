@@ -49,10 +49,10 @@ func ParseTable(src string) InputTable {
 
 	fields := strings.Split(lines[0], ";")
 
-	data := make([]map[string]string, len(lines)-1)
+	data := make([]map[string]string, 0, len(lines)-1)
 
 	for i := 1; i < len(lines); i++ {
-		data[i-1] = make(map[string]string)
+		loop_data := make(map[string]string)
 
 		linesplit := strings.Split(lines[i], ";")
 
@@ -61,8 +61,10 @@ func ParseTable(src string) InputTable {
 		}
 
 		for idx, field := range fields {
-			data[i-1][field] = linesplit[idx]
+			loop_data[field] = linesplit[idx]
 		}
+
+		data = append(data, loop_data)
 	}
 
 	return InputTable{Data: data}
