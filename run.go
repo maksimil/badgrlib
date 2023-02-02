@@ -12,23 +12,23 @@ func createSvgs(format Format, data_source string) ([]string, error) {
 	var wg sync.WaitGroup
 	wg.Add(len(data.Data))
 
-	svgs := make([]string, 0, len(data.Data))
+	svgs := make([]string, len(data.Data))
 	ret_err := error(nil)
 
-	for _, loop_object_data := range data.Data {
-		go func(object_data map[string]string) {
+	for loop_idx, loop_object_data := range data.Data {
+		go func(idx int, object_data map[string]string) {
 			svg, err := CreateSingleSvg(format, object_data)
 
-			mut.Lock()
 			if err != nil {
+				mut.Lock()
 				ret_err = err
+				mut.Unlock()
 			} else {
-				svgs = append(svgs, svg)
+				svgs[idx] = svg
 			}
-			mut.Unlock()
 
 			wg.Done()
-		}(loop_object_data)
+		}(loop_idx, loop_object_data)
 	}
 
 	wg.Wait()
@@ -40,47 +40,44 @@ func createSvgs(format Format, data_source string) ([]string, error) {
 	return svgs, nil
 }
 
-func createPapers(format Format, svgs []string) ([]string, error) {
+func createPages(format Format, svgs []string) ([]string, error) {
 	objects_on_page := format.PaperFit.X * format.PaperFit.Y
+
+	page_count := len(svgs) / objects_on_page
+	if len(svgs)%objects_on_page > 0 {
+		page_count += 1
+	}
 
 	var mut sync.Mutex
 
 	var wg sync.WaitGroup
 
-	papers := make([]string, 0)
+	pages := make([]string, page_count)
 	ret_err := error(nil)
 
-	loop_svg_group := make([]string, 0, objects_on_page)
-
-	create_paper := func() {
+	create_page := func(loop_svg_group []string, loop_idx int) {
 		wg.Add(1)
-		go func(svg_group []string) {
-			paper, err := FitSvgsToPaper(format, svg_group)
+		go func(svg_group []string, idx int) {
+			page, err := FitSvgsToPaper(format, svg_group)
 
-			mut.Lock()
 			if err != nil {
+				mut.Lock()
 				ret_err = err
+				mut.Unlock()
 			} else {
-				papers = append(papers, paper)
+				pages[idx] = page
 			}
-			mut.Unlock()
 
 			wg.Done()
-		}(loop_svg_group)
+		}(loop_svg_group, loop_idx)
 	}
 
-	for _, svg := range svgs {
-		loop_svg_group = append(loop_svg_group, svg)
-
-		if len(loop_svg_group) == objects_on_page {
-			create_paper()
-			loop_svg_group = make([]string, 0, objects_on_page)
-		}
+	for loop_idx := 0; loop_idx < page_count-1; loop_idx++ {
+		loop_svg_group := svgs[objects_on_page*loop_idx : objects_on_page*(loop_idx+1)]
+		create_page(loop_svg_group, loop_idx)
 	}
 
-	if len(loop_svg_group) > 0 {
-		create_paper()
-	}
+	create_page(svgs[objects_on_page*(page_count-1):], page_count-1)
 
 	wg.Wait()
 
@@ -88,7 +85,7 @@ func createPapers(format Format, svgs []string) ([]string, error) {
 		return []string{}, ret_err
 	}
 
-	return papers, nil
+	return pages, nil
 }
 
 func RunFormat(format_source string, data_source string) ([]string, error) {
@@ -104,7 +101,7 @@ func RunFormat(format_source string, data_source string) ([]string, error) {
 		return []string{}, err
 	}
 
-	papers, err := createPapers(format, svgs)
+	papers, err := createPages(format, svgs)
 
 	if err != nil {
 		return []string{}, err
