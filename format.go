@@ -1,6 +1,7 @@
 package badgrlib
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -44,7 +45,7 @@ type InputTable struct {
 	Data []map[string]string
 }
 
-func ParseTable(src string) InputTable {
+func ParseTable(src string) (InputTable, error) {
 	lines := strings.Split(strings.ReplaceAll(src, "\r\n", "\n"), "\n")
 
 	fields := strings.Split(lines[0], ";")
@@ -53,19 +54,25 @@ func ParseTable(src string) InputTable {
 
 	for i := 1; i < len(lines); i++ {
 		loop_data := make(map[string]string)
+		line := lines[i]
 
-		linesplit := strings.Split(lines[i], ";")
-
-		if len(fields) != len(linesplit) {
+		if line == "" {
 			continue
 		}
 
+		line_elements := strings.Split(line, ";")
+
+		if len(line_elements) != len(fields) {
+			return InputTable{},
+				fmt.Errorf("line %d has wrong number of elements", i+1)
+		}
+
 		for idx, field := range fields {
-			loop_data[field] = linesplit[idx]
+			loop_data[field] = line_elements[idx]
 		}
 
 		data = append(data, loop_data)
 	}
 
-	return InputTable{Data: data}
+	return InputTable{Data: data}, nil
 }

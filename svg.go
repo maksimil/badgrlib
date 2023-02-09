@@ -6,27 +6,27 @@ import (
 )
 
 var (
-	BOX_TEMPLATE_SRC = "<rect width=\"{{.Dimensions.Width}}\" height=\"{{.Dimensions.Height}}\" " +
-		"x=\"{{.X}}\" y=\"{{.Y}}\" style=\"fill:none;stroke:#000000;stroke-width:0.5\"/>"
-	BOX_TEMPLATE = template.Must(template.New("box").Parse(BOX_TEMPLATE_SRC))
-
 	TEXT_TEMPLATE_SRC = "<text x=\"{{.X}}\" y=\"{{.Y}}\" " +
 		"style=\"font-size:{{.FontSize}}px;line-height:1.25;font-family:Arial\">" +
 		"{{.Text}}</text>"
 	TEXT_TEMPLATE = template.Must(template.New("text").Parse(TEXT_TEMPLATE_SRC))
-)
 
-type BoxTemplateSource struct {
-	X          float64
-	Y          float64
-	Dimensions Dimensions
-}
+	SVG_TEMPLATE_SRC = "<svg " +
+		"width=\"{{.Dimensions.Width}}mm\" height=\"{{.Dimensions.Height}}mm\" " +
+		"viewBox=\"0 0 {{.Dimensions.Width}} {{.Dimensions.Height}}\">{{.Contents}}</svg>"
+	SVG_TEMPLATE = template.Must(template.New("svg").Parse(SVG_TEMPLATE_SRC))
+)
 
 type TextTemplateSource struct {
 	X        float64
 	Y        float64
 	FontSize float64
 	Text     string
+}
+
+type SvgTemplateSource struct {
+	Dimensions Dimensions
+	Contents   string
 }
 
 func executeTemplate(tmpl *template.Template, data interface{}) (string, error) {
@@ -37,18 +37,6 @@ func executeTemplate(tmpl *template.Template, data interface{}) (string, error) 
 
 func CreateSingleSvg(format Format, data map[string]string) (string, error) {
 	contents := ""
-
-	box_data := BoxTemplateSource{
-		X:          0,
-		Y:          0,
-		Dimensions: format.Dimensions,
-	}
-
-	box_contents, err := executeTemplate(BOX_TEMPLATE, box_data)
-
-	if err != nil {
-		return "", err
-	}
 
 	for _, object := range format.Objects {
 		text_data := TextTemplateSource{
@@ -64,8 +52,16 @@ func CreateSingleSvg(format Format, data map[string]string) (string, error) {
 			return "", err
 		}
 
-		contents += box_contents + text_contents
+		contents += text_contents
 	}
 
 	return contents, nil
+}
+
+func WrapSvg(svg string, dimensions Dimensions) (string, error) {
+	svg_data := SvgTemplateSource{
+		Dimensions: dimensions,
+		Contents:   svg,
+	}
+	return executeTemplate(SVG_TEMPLATE, svg_data)
 }
