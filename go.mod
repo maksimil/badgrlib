@@ -1,4 +1,4 @@
-module github.com/maksimil/badgr-lib
+module github.com/maksimil/badgrlib
 
 go 1.19
 
