@@ -11,11 +11,11 @@ name = "firstname"
 
 x = 10
 y = 30
-font_size = 18
+font_size = 40
 
 [[objects]]
 name = "lastname"
 
 x = 10
 y = 60
-font_size = 16
+font_size = 36

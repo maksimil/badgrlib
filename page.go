@@ -1,62 +1,40 @@
 package badgrlib
 
 import (
-	"text/template"
+	"fmt"
+
+	"github.com/tdewolff/canvas"
 )
 
-var (
-	G_TEMPLATE_SRC = "<g " +
-		"transform=\"translate({{.Translate.X}},{{.Translate.Y}})\">" +
-		"<rect width=\"{{.Dimensions.Width}}\" height=\"{{.Dimensions.Height}}\" " +
-		"x=\"0\" y=\"0\" style=\"fill:none;stroke:#000000;stroke-width:0.5\">" +
-		"</rect>{{.Contents}}</g>"
-	G_TEMPLATE = template.Must(template.New("g").Parse(G_TEMPLATE_SRC))
-)
+func FitObjectsOnPage(format Format, drawers []ContextDrawer) ContextDrawer {
+	return func(context Context) {
+		context.CanvasContext.SetCoordSystem(canvas.CartesianIV)
+		context.CanvasContext.DrawPath(0, 0,
+			canvas.Grid(
+				format.Dimensions.Width*float64(format.PaperFit.X),
+				format.Dimensions.Height*float64(format.PaperFit.Y),
+				format.PaperFit.X, format.PaperFit.Y, 0.5))
 
-type Translate struct {
-	X float64
-	Y float64
-}
+		objects_on_page := format.PaperFit.X * format.PaperFit.Y
 
-type GTemplateSource struct {
-	Translate  Translate
-	Dimensions Dimensions
-	Contents   string
-}
-
-func FitObjectsOnPage(format Format, svg_objects []string) (string, error) {
-	objects_on_page := format.PaperFit.X * format.PaperFit.Y
-	if len(svg_objects) < objects_on_page {
-		objects_on_page = len(svg_objects)
-	}
-
-	contents := ""
-
-	for i := 0; i < objects_on_page; i++ {
-		translate := Translate{
-			X: format.Dimensions.Width * float64(i%format.PaperFit.X),
-			Y: format.Dimensions.Height * float64(i/format.PaperFit.X),
+		if len(drawers) < objects_on_page {
+			objects_on_page = len(drawers)
 		}
 
-		g_data := GTemplateSource{
-			Translate:  translate,
-			Dimensions: format.Dimensions,
-			Contents:   svg_objects[i],
+		for i := 0; i < objects_on_page; i++ {
+			fmt.Println(
+				format.Dimensions.Width*float64(i%format.PaperFit.X),
+				format.Dimensions.Height*float64(i/format.PaperFit.X),
+			)
+			context.CanvasContext.
+				Translate(
+					format.Dimensions.Width*float64(i%format.PaperFit.X),
+					-format.Dimensions.Height*float64(i/format.PaperFit.X),
+				)
+
+			drawers[i](context)
+
+			context.CanvasContext.ResetView()
 		}
-
-		g_text, err := executeTemplate(G_TEMPLATE, g_data)
-
-		if err != nil {
-			return "", err
-		}
-
-		contents += g_text
 	}
-
-	page_dimensions := Dimensions{
-		Width:  format.Dimensions.Width * float64(format.PaperFit.X),
-		Height: format.Dimensions.Height * float64(format.PaperFit.Y),
-	}
-
-	return WrapSvg(contents, page_dimensions)
 }
