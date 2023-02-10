@@ -1,5 +1,9 @@
 # badrlib
 
+## About
+
+A go library for generating badges
+
 ## Spec
 
 ### Format
