@@ -2,7 +2,7 @@
 
 ## Spec
 
-### Types
+### Format
 
 - `Format`
 
@@ -17,16 +17,6 @@
 
   `InputTable` can also be parsed from a csv file (`example/names.csv`)
 
-- `Context`
-
-  Contains canvas context and a font family (from `tdewolff/canvas`)
-
-- `ContextDrawer: func (Context)`
-
-  Is a function that draws on a `Context`
-
-### Functions
-
 - `ParseFormat: string -> (Format, error)`
 
   Returns an error on toml parsing errors
@@ -38,6 +28,16 @@
   Returns an error if one line contains a number of elements different
   from the first line (empty lines however are allowed)
 
+### Drawers
+
+- `Context`
+
+  Contains canvas context and a font family (from `tdewolff/canvas`)
+
+- `ContextDrawer: func (Context)`
+
+  Is a function that draws on a `Context`
+
 - `CreateObjectDrawer: (Format, map[string]string) -> ContextDrawer`
 
   Returns a `ContextDrawer` that draws
@@ -46,3 +46,17 @@
 
   Returns a complete svg containing the first elements from the list to fit
   on the paper
+
+### Render
+
+- `FileData = []byte`
+
+  Just to avoid putting `[]byte` everywhere
+
+- `FindArial: () -> (*canvas.FontFamily, error)`
+
+  Finds the `arial.ttf` on your system
+
+- `RenderPdf: (*canvas.FontFamily, format Format, []ContextDrawer) -> (FileData, error)`
+
+  Renders pages to a pdf

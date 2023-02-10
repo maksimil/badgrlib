@@ -1,8 +1,6 @@
 package badgrlib
 
 import (
-	"fmt"
-
 	"github.com/tdewolff/canvas"
 )
 
@@ -22,10 +20,6 @@ func FitObjectsOnPage(format Format, drawers []ContextDrawer) ContextDrawer {
 		}
 
 		for i := 0; i < objects_on_page; i++ {
-			fmt.Println(
-				format.Dimensions.Width*float64(i%format.PaperFit.X),
-				format.Dimensions.Height*float64(i/format.PaperFit.X),
-			)
 			context.CanvasContext.
 				Translate(
 					format.Dimensions.Width*float64(i%format.PaperFit.X),

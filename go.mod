@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.2.1
+	github.com/flopp/go-findfont v0.1.0
 	github.com/tdewolff/canvas v0.0.0-20221230020303-9eb6d3934367
 )
 
